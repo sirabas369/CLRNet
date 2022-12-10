@@ -66,6 +66,9 @@ def parse_args():
         help='whether to test the checkpoint on testing set')
     parser.add_argument('--gpus', nargs='+', type=int, default='0')
     parser.add_argument('--seed', type=int, default=0, help='random seed')
+    parser.add_argument('--wandb_name', type=str, default=None, help='Name of wandb run')
+    parser.add_argument('--wandb_project', type=str, default=None, help='Name of wandb project')
+    parser.add_argument('--wandb_id', type=str, default=None, help='Name of wandb id')
     args = parser.parse_args()
 
     return args
