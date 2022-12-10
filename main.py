@@ -26,7 +26,11 @@ def main():
     cfg.seed = args.seed
 
     cfg.work_dirs = args.work_dirs if args.work_dirs else cfg.work_dirs
-
+    
+    cfg.wandb_name = args.wandb_name
+    cfg.wandb_project = args.wandb_project
+    cfg.wandb_id = args.wandb_id
+    
     cudnn.benchmark = True
 
     runner = Runner(cfg)
