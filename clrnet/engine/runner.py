@@ -16,6 +16,9 @@ from clrnet.utils.recorder import build_recorder
 from clrnet.utils.net_utils import save_model, load_network, resume_network
 from mmcv.parallel import MMDataParallel
 
+import wandb
+from clrnet.utils.logging import init_wandb, wandb_log_train, wandb_log_val
+
 
 class Runner(object):
     def __init__(self, cfg):
@@ -74,19 +77,26 @@ class Runner(object):
                 lr = self.optimizer.param_groups[0]['lr']
                 self.recorder.lr = lr
                 self.recorder.record('train')
+                
+        # Logging on W&B
+        wandb_log_train(self.recorder.loss_stats, self.recorder.lr, self.recorder.epoch)
 
     def train(self):
         self.recorder.logger.info('Build train loader...')
         train_loader = build_dataloader(self.cfg.dataset.train,
                                         self.cfg,
                                         is_train=True)
-
+        
         self.recorder.logger.info('Start training...')
         start_epoch = 0
         if self.cfg.resume_from:
             start_epoch = resume_network(self.cfg.resume_from, self.net,
                                          self.optimizer, self.scheduler,
                                          self.recorder)
+        
+        # Initializing W&B
+        init_wandb(self.net, self.cfg)
+        
         for epoch in range(start_epoch, self.cfg.epochs):
             self.recorder.epoch = epoch
             self.train_epoch(epoch, train_loader)
@@ -142,7 +152,15 @@ class Runner(object):
         metric = self.val_loader.dataset.evaluate(predictions,
                                                   self.cfg.work_dir)
         self.recorder.logger.info('metric: ' + str(metric))
+        
+        # Logging on W&B
+        wandb_log_val(metric, self.recorder.epoch)
+        
 
     def save_ckpt(self, is_best=False):
         save_model(self.net, self.optimizer, self.scheduler, self.recorder,
                    is_best)
+        
+        
+        ckpt_name = 'best' if is_best else self.recorder.epoch
+        wandb.save(os.path.join(os.path.join(self.recorder.work_dir, 'ckpt'), '{}.pth'.format(ckpt_name)))
