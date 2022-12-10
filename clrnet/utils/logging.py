@@ -12,16 +12,19 @@ def init_wandb(cfg) -> None:
     """
     
     wandb.init(
-        name=cfg.WANDB.NAME,
+        name=cfg.wandb_name,
         config=cfg,
-        project=cfg.WANDB.PROJECT,
+        project=cfg.wandb_project,
         resume="allow",
-        id=cfg.WANDB.RESTORE_NAME
+        id=cfg.wandb_id
     )
 
 
-def wandb_log(train_loss, lr, iter):
+def wandb_log_train(train_loss, lr, iter):
     wandb.log({
         'Loss': train_loss,
         'Learning Rate': lr,
     }, step=iter)
+    
+def wandb_log_val(val_metric, iter):
+    wandb.log({'F1@50 Score': val_metric}, step=iter)
