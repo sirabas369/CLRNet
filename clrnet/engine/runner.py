@@ -95,7 +95,7 @@ class Runner(object):
                                          self.recorder)
         
         # Initializing W&B
-        init_wandb(self.net, self.cfg)
+        init_wandb(self.cfg)
         
         for epoch in range(start_epoch, self.cfg.epochs):
             self.recorder.epoch = epoch
