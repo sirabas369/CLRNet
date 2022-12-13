@@ -18,7 +18,7 @@ from mmcv.parallel import MMDataParallel
 
 import wandb
 from clrnet.utils.logging import init_wandb, wandb_log_train, wandb_log_val
-
+from clrnet.utils.recorder import SmoothedValue
 
 class Runner(object):
     def __init__(self, cfg):
@@ -79,7 +79,7 @@ class Runner(object):
                 self.recorder.record('train')
                 
         # Logging on W&B
-        wandb_log_train(self.recorder.loss_stats, self.recorder.lr, self.recorder.epoch)
+        wandb_log_train(self.recorder.loss_stats['loss'].avg, self.recorder.lr, self.recorder.epoch)
 
     def train(self):
         self.recorder.logger.info('Build train loader...')
